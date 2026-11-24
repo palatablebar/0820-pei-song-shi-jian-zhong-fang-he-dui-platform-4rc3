@@ -1,10 +1,11 @@
 import {request} from './client.js';
-import {snapshot, history} from './view.js';
+import {snapshot, history, responsibility} from './view.js';
 import {visualize} from './plots.js';
 
 const form = document.querySelector('#source');
 const file = document.querySelector('#file');
 const profile = document.querySelector('#profile');
+const operator = document.querySelector('#operator');
 const status = document.querySelector('#notice');
 const detail = document.querySelector('#review');
 const evidence = document.querySelector('#evidence');
@@ -12,8 +13,15 @@ const stages = [...document.querySelectorAll('[data-stage]')];
 let stage = 'balance';
 let report, selected, batch, running = false;
 
+operator.value = localStorage.getItem('operator') || '';
+
+function me() {
+  return operator.value.trim();
+}
+
 function source() {
   const data = new FormData();
+  data.append('actor',me());
   if (file.files.length) data.append('file',file.files[0]);
   else data.append('sample',profile.value);
   return data;
@@ -32,9 +40,15 @@ function draw() {
   document.querySelector('#panel-title').textContent = stages.find(button => button.dataset.stage===stage)?.textContent || '运行对账';
   detail.hidden = !batch;
   if (batch) {
+    const mine = me() !== '' && batch.owner === me();
+    const finalized = batch.status === 'APPROVED';
     document.querySelector('#run-status').textContent = `${batch.id.slice(0,10)} · ${batch.status} · r${batch.revision}`;
-    detail.querySelector('[value="APPROVED"]').disabled = !report.balance.releasable || batch.status==='APPROVED';
-    detail.querySelector('[value="HELD"]').disabled = batch.status==='APPROVED';
+    responsibility(batch, report);
+    document.querySelector('#claim').hidden = mine || finalized;
+    document.querySelector('#release').hidden = !mine || finalized;
+    detail.elements.note.disabled = !mine;
+    detail.querySelector('[value="APPROVED"]').disabled = !mine || !report.balance.releasable || finalized;
+    detail.querySelector('[value="HELD"]').disabled = !mine || finalized;
     evidence.href = `/api/runs/${batch.id}/evidence`;
   }
 }
@@ -84,6 +98,7 @@ form.addEventListener('submit', event => {
 const filename = document.querySelector('#file-name');
 profile.addEventListener('change',()=>{file.value=''; filename.textContent=''; preview(stage);});
 file.addEventListener('change',()=>{filename.textContent=file.files[0]?.name || ''; preview(stage);});
+operator.addEventListener('input',()=>{localStorage.setItem('operator',me()); draw();});
 document.querySelector('#rows').addEventListener('click',event=>{
   const button = event.target.closest('[data-case]');
   if (button) { selected = button.dataset.case; draw(); document.querySelector(`[data-case="${CSS.escape(selected)}"]`).focus(); }
@@ -95,10 +110,24 @@ document.querySelector('#history').addEventListener('click',event=>{
     stage='balance'; show(result,true); announce('已载入历史批次'); await refresh();
   });
 });
+document.querySelector('#claim').addEventListener('click',()=>{
+  if (!batch) return;
+  perform(async()=>{
+    const result = await request(`/api/runs/${batch.id}/claim`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({actor:me()})});
+    show(result,true); announce('已接办，成为当前责任人'); await refresh();
+  });
+});
+document.querySelector('#release').addEventListener('click',()=>{
+  if (!batch) return;
+  perform(async()=>{
+    const result = await request(`/api/runs/${batch.id}/release`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({actor:me()})});
+    show(result,true); announce('已交回批次'); await refresh();
+  });
+});
 detail.addEventListener('submit',event=>{
   event.preventDefault();
   perform(async()=>{
-    const payload={status:event.submitter.value,revision:batch.revision,note:detail.elements.note.value};
+    const payload={status:event.submitter.value,revision:batch.revision,note:detail.elements.note.value,actor:me()};
     const result=await request(`/api/runs/${batch.id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     show(result,true); announce(result.status==='APPROVED'?'批次已签发':'批次已暂缓'); await refresh();
   });

@@ -6,7 +6,7 @@ from app.review.service import execute
 
 
 def test_manifest_records_source_and_rule(store, dirty):
-    run = execute(store, dirty)
+    run = execute(store, dirty, "值班员甲")
     manifest = run["report"]["manifest"]
     assert manifest["run_id"] == run["id"]
     assert manifest["version"] == RULE_VERSION

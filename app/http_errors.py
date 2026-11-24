@@ -11,10 +11,13 @@ LABELS = {
     "ROW_LIMIT": "文件超过 2000 行",
     "FILE_REQUIRED": "请选择 CSV 文件",
     "RUN_NOT_FOUND": "批次不存在",
+    "ACTOR_REQUIRED": "请填写值班员标识",
     "REVIEW_FIELDS": "请填写 3 至 200 字复核意见",
     "STALE_REVIEW": "批次已更新，请刷新",
     "RUN_FINALIZED": "批次已签发",
     "UNRESOLVED_ISSUES": "存在待处理差异",
+    "OWNER_ACTIVE": "责任人守护期未届满，暂不能接办",
+    "OWNER_MISMATCH": "仅当前责任人可执行此操作",
     "SAMPLE_UNKNOWN": "样例不存在",
     "STAGE_UNKNOWN": "处理阶段不存在",
 }
@@ -27,7 +30,14 @@ def response(error):
         if code in {"RUN_NOT_FOUND", "SAMPLE_UNKNOWN", "STAGE_UNKNOWN"}
         else (
             409
-            if code in {"STALE_REVIEW", "RUN_FINALIZED", "UNRESOLVED_ISSUES"}
+            if code
+            in {
+                "STALE_REVIEW",
+                "RUN_FINALIZED",
+                "UNRESOLVED_ISSUES",
+                "OWNER_ACTIVE",
+                "OWNER_MISMATCH",
+            }
             else 413 if code == "FILE_TOO_LARGE" else 422
         )
     )

@@ -16,7 +16,8 @@ body.terminal {margin:0;background:var(--bg);color:var(--ink);font:var(--size)/1
 .terminal .file {cursor:pointer;color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px}
 .terminal #file-name {overflow-wrap:anywhere;max-width:100%}
 .terminal .stages {grid-area:stages;display:flex;gap:6px;flex-wrap:wrap;padding:var(--pad);background:var(--surface);min-width:0}
-.terminal button,.terminal select,.terminal textarea {font:inherit;color:inherit;border:1px solid var(--line);padding:.43em .75em;background:var(--button);border-radius:var(--radius);cursor:pointer}
+.terminal button,.terminal select,.terminal textarea,.terminal input {font:inherit;color:inherit;border:1px solid var(--line);padding:.43em .75em;background:var(--button);border-radius:var(--radius);cursor:pointer}
+.terminal input {cursor:text}
 .terminal button:is(:hover,[aria-pressed="true"]),.terminal .action {background:var(--accent);color:var(--surface);border-color:var(--accent)}
 .terminal button:disabled {opacity:.52;cursor:default} .terminal :focus-visible {outline:2px solid var(--accent);outline-offset:3px}
 .terminal a {color:var(--accent);text-underline-offset:.2em}
@@ -35,6 +36,11 @@ body.terminal {margin:0;background:var(--bg);color:var(--ink);font:var(--size)/1
 .terminal #detail {margin:0;max-height:230px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font: .91em/1.5 var(--font-num)}
 .terminal #history {list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:var(--gap);margin:0} .terminal #history li {display:flex;align-items:center}
 .terminal #review {margin-top:14px;max-width:580px} .terminal textarea {display:block;width:100%;min-height:54px;cursor:text}
+.terminal #owner-line {color:var(--sub);margin:.4em 0}
+.terminal .todo {display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:.4em 0;color:var(--sub)}
+.terminal .todo-case {border:1px solid var(--line);padding:2px 6px;display:inline-flex;gap:6px;align-items:center}
+.terminal #trail {margin:.4em 0} .terminal #handovers {margin:.4em 0;padding-left:1.4em;color:var(--sub);font-size:.9em}
+.terminal #history .owner {color:var(--sub);font-size:.83em;margin-left:6px}
 .terminal .review-actions {display:flex;gap:6px;margin:8px 0}
 .terminal .statusbar {grid-area:statusbar;display:flex;gap:14px;justify-content:space-between;border-top:1px solid var(--line);padding:10px 0}
 .terminal [data-failure="true"] {color:var(--alert)}

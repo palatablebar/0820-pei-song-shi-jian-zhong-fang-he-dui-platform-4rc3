@@ -8,6 +8,7 @@
 {% endmacro %}
 {% macro intake() %}
 <form class="source" id="source" aria-label="批次输入">
+  <label>值班员 <input id="operator" type="text" maxlength="40" placeholder="工号或姓名" autocomplete="off"></label>
   <label>输入样例 <select id="profile"><option value="dirty">带异常样例</option><option value="clean">可签发样例</option></select></label>
   <label for="file" class="file">上传 CSV</label><input id="file" type="file" accept=".csv,text/csv"><span id="file-name" aria-live="polite"></span>
   <button type="submit" class="action">执行批次</button>
@@ -35,7 +36,14 @@
 {% macro archive() %}
 <aside class="panel archive"><h2>批次复核</h2><ul id="history"></ul>
   <form id="review" hidden>
-    <p id="run-status"></p><label for="note">复核意见</label>
+    <p id="run-status"></p><p id="owner-line"></p>
+    <div id="todo" class="todo" aria-label="待办分组"></div>
+    <div class="review-actions handover">
+      <button type="button" id="claim" hidden>接办</button>
+      <button type="button" id="release" hidden>交回</button>
+    </div>
+    <details id="trail" open><summary>交接记录</summary><ol id="handovers"></ol></details>
+    <label for="note">复核意见</label>
     <textarea id="note" name="note" minlength="3" maxlength="200" required></textarea>
     <div class="review-actions"><button name="decision" value="HELD">暂缓</button><button class="action" name="decision" value="APPROVED">签发</button></div>
     <a id="evidence">下载复核证据</a>

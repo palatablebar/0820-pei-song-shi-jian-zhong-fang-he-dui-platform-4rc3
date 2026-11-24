@@ -1,10 +1,15 @@
 import {element, pretty} from './client.js';
 
 const labels = {READY:'通过', MISMATCH:'差异待复核', PENDING:'待复核', APPROVED:'已签发', HELD:'已暂缓'};
+const actions = {CLAIM:'认领批次', TAKEOVER:'接办批次', RELEASE:'交回批次'};
 const headers = ['业务分组', '输入行', '计算值', '参考值', '判定'];
 
 export function badge(status) {
   return element('span', labels[status] || status, {class:'badge', 'data-result':status, title: status});
+}
+
+function local(stamp) {
+  return new Date(stamp).toLocaleString();
 }
 
 export function snapshot(report, selected, stage) {
@@ -42,13 +47,40 @@ export function snapshot(report, selected, stage) {
   document.querySelector('#counts').textContent = report.balance ? `行数 ${report.balance.accounted}/${report.balance.input} · ${report.balance.ready} 组通过` : `采信 ${stats.accepted} 行 · 隔离 ${stats.rejected} 行`;
 }
 
+export function responsibility(batch, report) {
+  const owner = document.querySelector('#owner-line');
+  if (batch.owner) {
+    const guard = batch.owner_since && batch.guard_seconds != null
+      ? ` · 守护期至 ${local(Date.parse(batch.owner_since) + batch.guard_seconds * 1000)}`
+      : '';
+    owner.textContent = `当前责任人 ${batch.owner} · 自 ${local(batch.owner_since)}${guard}`;
+  } else {
+    owner.textContent = '当前责任人 无 · 可接办';
+  }
+  const todo = document.querySelector('#todo');
+  todo.replaceChildren();
+  const pending = (report.cases || []).filter(row => row.status !== 'READY');
+  todo.append(element('span', pending.length ? `待办分组 ${pending.length} 组` : '待办分组 无'));
+  for (const row of pending) {
+    const chip = element('span', undefined, {class:'todo-case'});
+    chip.append(element('strong', row.case), badge(row.status));
+    todo.append(chip);
+  }
+  const trail = document.querySelector('#handovers');
+  trail.replaceChildren();
+  for (const entry of batch.handovers || []) {
+    trail.append(element('li', `${entry.actor} ${actions[entry.action] || entry.action} · ${local(entry.at)}`));
+  }
+  if (!trail.children.length) trail.append(element('li','尚无交接记录'));
+}
+
 export function history(items, active) {
   const target = document.querySelector('#history');
   target.replaceChildren();
   for (const run of items) {
     const button = element('button', run.id.slice(0,10), {'data-run':run.id,'aria-pressed':String(run.id===active),type:'button'});
     const item = element('li');
-    item.append(button, badge(run.status));
+    item.append(button, badge(run.status), element('span', run.owner || '无', {class:'owner', title:'当前责任人'}));
     target.append(item);
   }
   if (!items.length) target.append(element('li','尚无执行批次'));

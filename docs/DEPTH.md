@@ -13,6 +13,7 @@
 | M5 运行对账 | 对照输入、采信和隔离行 | `POST /api/stages/balance` | `app/modules/reconcile.py` | `tests/test_reconcile.py` |
 | M6 批次复核 | 执行批次并签发或暂缓 | `POST /api/runs、PATCH /api/runs/<id>` | `app/review/service.py` | `tests/test_review.py` |
 | M7 证据交付 | 下载复核清单 | `GET /api/runs/<id>/evidence` | `app/evidence/render.py` | `tests/test_evidence.py` |
+| M8 责任交接 | 接办、交回并登记交接记录 | `POST /api/runs/<id>/claim、POST /api/runs/<id>/release` | `app/review/store.py` | `tests/test_ownership.py` |
 
 ## 输入陷阱
 
@@ -29,6 +30,9 @@
 | TRAP-16 | 引号未闭合时拒收文件 | `app/intake/reader.py` | `tests/test_intake.py::test_unclosed_quote_invalidates_source` |
 | TRAP-18 | 区分空文件、全空白和仅表头 | `app/intake/reader.py` | `tests/test_intake.py::test_empty_states_have_distinct_causes` |
 | TRAP-26 | 拒绝旧版本复核 | `app/review/store.py` | `tests/test_review.py::test_review_optimistic_lock` |
+| TRAP-27 | 守护期内拒绝接办 | `app/review/store.py` | `tests/test_ownership.py::test_claim_rejected_within_guard` |
+| TRAP-28 | 接办后原责任人提交失效 | `app/review/store.py` | `tests/test_ownership.py::test_former_owner_submission_fails_after_takeover` |
+| TRAP-29 | 同一批次只有一个有效责任人 | `app/review/store.py` | `tests/test_concurrency.py::test_parallel_claim_has_one_winner` |
 
 ## 领域反例
 

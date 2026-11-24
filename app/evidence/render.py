@@ -9,6 +9,11 @@ def artifact(run):
         "cases": run["report"]["cases"],
         "intake": run["report"]["intake"],
         "review": {key: run[key] for key in ("status", "revision", "note", "reviewed")},
+        "ownership": {
+            "owner": run["owner"],
+            "owner_since": run["owner_since"],
+            "handovers": run["handovers"],
+        },
     }
     return (
         json.dumps(packet, ensure_ascii=False, sort_keys=True, indent=2) + "\n"

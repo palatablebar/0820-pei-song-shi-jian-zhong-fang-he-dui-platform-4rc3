@@ -13,8 +13,11 @@ def test_stage_has_http_entry_and_no_database_write(client, stage):
 
 
 def test_upload_uses_input_content(client, clean):
-    a = client.post("/api/runs", data={"file": (io.BytesIO(clean), "input.csv")})
-    b = client.post("/api/runs", data={"sample": "clean"})
+    a = client.post(
+        "/api/runs",
+        data={"file": (io.BytesIO(clean), "input.csv"), "actor": "值班员甲"},
+    )
+    b = client.post("/api/runs", data={"sample": "clean", "actor": "值班员甲"})
     assert a.status_code == 200 and a.json["id"] == b.json["id"]
 
 
